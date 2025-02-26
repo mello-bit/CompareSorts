@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
+#include <time.h>
 
 #define INPUT_CATALOG "files/inputs/"
 #define OUTPUT_CATALOG "files/outputs/"
@@ -12,6 +13,8 @@
 #define BIG_NUM 10000
 
 #define MAX_BUF_SIZE 80
+
+#define BORDER 100000
 
 
 FILE* file_open(char* filename, char* mode) {
@@ -31,14 +34,6 @@ FILE* file_open(char* filename, char* mode) {
     return file;
 }
 
-char* concat(char* s1, char* s2) {
-    char* res = (char*)malloc(sizeof(char) * (strlen(s1) + strlen(s2) + 1));
-    strcat(res, s1);
-    strcat(res, s2);
-
-    return res;
-}
-
 void print_list(long long int* arr, int n) {
     for (int i = 0; i < n; i++) {
         printf("%lld ", arr[i]);
@@ -54,6 +49,9 @@ long long int* generate_array(int n) {
 
     for (int i = 0; i < n; i++) {
         arr[i] = get_rand_number();
+        while (arr[i] >= LLONG_MAX - BORDER || arr[i] <= LLONG_MIN + BORDER) {
+            arr[i] = get_rand_number();
+        }
     }
 
     return arr;
@@ -78,14 +76,14 @@ long long int* generate_sorted_array(int n) {
 long long int* generate_rotated_sorted_array(int n) {
     long long int* arr = (long long int*) malloc(sizeof(long long int*) * n);
 
-    arr[n - 1] = get_rand_number();
-    for (int i = n - 2; i >= 0; i--) {
+    arr[0] = get_rand_number();
+    for (int i = 1; i < n; i++) {
         int ost = get_rand_number() % 10;
         while (ost == 0) {
             ost = get_rand_number() % 10;
         }
 
-        arr[i] = arr[i + 1] - ost;
+        arr[i] = arr[i - 1] - ost;
     }
 
     return arr;
@@ -111,6 +109,14 @@ void create_file(char* filename, char* filname_sorted, char* filename_rotated_so
     for (int i = 0; i < n; i++) {
         fprintf(file_rotated_sorted, "%lld\n", rotated_sorted_arr[i]);
     }
+
+    fclose(file);
+    fclose(file_sorted);
+    fclose(file_rotated_sorted);
+
+    free(arr);
+    free(sorted_arr);
+    free(rotated_sorted_arr);
 }
 
 void generate_data() {
@@ -131,5 +137,9 @@ void generate_data() {
 }
 
 int main(void) {
+    srand(time(NULL));
+
     generate_data();
+
+    return 0;
 }
