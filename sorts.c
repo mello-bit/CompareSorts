@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define INPUT_CATALOG "files/inputs/"
 #define OUTPUT_CATALOG "files/outputs/"
@@ -51,10 +52,18 @@ long long int* get_data(char* filename, int n) {
 }
 
 // mark - показатель с каким именем сохранять 
-void generate_output(long long int* arr, char* mark, int n) {
+void generate_output(long long int* arr, char* mark, char* sort_type, int n) {
     char filename[MAX_BUF_SIZE];
 
-    sprintf(filename, "%swere_%s%d.txt", OUTPUT_CATALOG, mark, n);
+    sprintf(
+        filename,
+        "%s%s%s_were_%s%d.txt",
+        OUTPUT_CATALOG,
+        sort_type,
+        (strcmp(sort_type, "heap_sort/") == 0 ? "hs" : "sls"),
+        mark,
+        n
+    );
 
     FILE* output_file = fopen(filename, "w");
     if (output_file == NULL) {
@@ -145,19 +154,24 @@ int main(void) {
     // пусть тут и хард код но по усл сказано что только три состояния входных массивов
     char names[3][MEAN_BUF_SIZE] = { UNSORTED, SORTED, SORTED_ROTATED };
 
-    for (int i = 0; i < 3; i++) {
-        for  (int j = 0; j < values_len; j++) {
-            char filename[MAX_BUF_SIZE];
-            int n = values[j];
+    char sort_types[2][MEAN_BUF_SIZE] = { "heap_sort/", "selection_sort/" };
+    int sort_types_len = sizeof(sort_types) / sizeof(sort_types[0]);
 
-            sprintf(filename, "%s%s%d.txt", INPUT_CATALOG, names[i], n);
+    for (int t = 0; t < sort_types_len; t++) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < values_len; j++) {
+                char filename[MAX_BUF_SIZE];
+                int n = values[j];
 
-            long long int* arr = get_data(filename, n);
+                sprintf(filename, "%s%s%d.txt", INPUT_CATALOG, names[i], n);
 
-            heap_sort(arr, n);
-            generate_output(arr, names[i], n);  
-            
-            free(arr);
+                long long int* arr = get_data(filename, n);
+
+                heap_sort(arr, n);
+                generate_output(arr, names[i], sort_types[t], n);
+
+                free(arr);
+            }
         }
     }
 
