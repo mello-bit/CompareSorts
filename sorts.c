@@ -17,6 +17,9 @@
 #define MAX_BUF_SIZE 1000
 #define MEAN_BUF_SIZE 200
 
+int compare = 0;
+int transp = 0;
+
 /*
 тип данных long long int
 упорядочить по нубыванию
@@ -104,13 +107,17 @@ void selection_sort(long long int* arr, int n) {
 
     for (int i = 0; i < n; i++) {
         for (int q = 0; q <= j; q++) {
+            compare++;
+            
             if (arr[q] > arr[max_i]) {
                 max_i = q;
             }
         }
 
         swap(&arr[max_i], &arr[j]);
+        transp++;
 
+        j--;
         max_i = 0;
     }
 }
@@ -121,28 +128,39 @@ void heapify(long long int* arr, int n, int i) {
     int left = 2 * i + 1;
     int right = 2 * i + 2;
 
-    if (left < n && arr[left] > arr[largest])
-        largest = left;
+    if (left < n) {
+        compare++;
 
-    if (right < n && arr[right] > arr[largest])
-        largest = right;
+        if (arr[left] > arr[largest]) {
+            largest = left;
+        }
+    }
+
+    if (right < n) {
+        compare++;
+
+        if (arr[right] > arr[largest]) {
+            largest = right;
+        }
+    }
 
     if (largest != i) {
-        long long int temp = arr[i];
-        arr[i] = arr[largest];
-        arr[largest] = temp;
+        swap(&arr[i], &arr[largest]);
+        transp++;
+
         heapify(arr, n, largest);
     }
 }
 
 void heap_sort(long long int* arr, int n) {
-    for (int i = n / 2 - 1; i >= 0; i--)
+    for (int i = n / 2 - 1; i >= 0; i--) {
         heapify(arr, n, i);
+    }
 
     for (int i = n - 1; i > 0; i--) {
-        long long int temp = arr[0];
-        arr[0] = arr[i];
-        arr[i] = temp;
+        swap(&arr[0], &arr[i]);
+        transp++;
+
         heapify(arr, i, 0);
     }
 }
@@ -157,9 +175,9 @@ int main(void) {
     char sort_types[2][MEAN_BUF_SIZE] = { "heap_sort/", "selection_sort/" };
     int sort_types_len = sizeof(sort_types) / sizeof(sort_types[0]);
 
-    for (int t = 0; t < sort_types_len; t++) {
+    for (int j = 0; j < values_len; j++) {
         for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < values_len; j++) {
+            for (int t = 0; t < sort_types_len; t++) {
                 char filename[MAX_BUF_SIZE];
                 int n = values[j];
 
@@ -167,10 +185,21 @@ int main(void) {
 
                 long long int* arr = get_data(filename, n);
 
-                heap_sort(arr, n);
+                if (strcmp(sort_types[t], "heap_sort/") == 0) {
+                    heap_sort(arr, n);
+                }
+                else {
+                    selection_sort(arr, n);
+                }
+
+                printf("Array is %s, Size of input array - %d, Sort is %s, Compares: %d, Transpositions: %d\n", names[i], n, sort_types[t], compare, transp);
+
                 generate_output(arr, names[i], sort_types[t], n);
 
                 free(arr);
+
+                compare = 0;
+                transp = 0;
             }
         }
     }
