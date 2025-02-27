@@ -17,9 +17,6 @@
 #define MAX_BUF_SIZE 1000
 #define MEAN_BUF_SIZE 200
 
-int compare = 0;
-int transp = 0;
-
 /*
 тип данных long long int
 упорядочить по нубыванию
@@ -105,6 +102,8 @@ void selection_sort(long long int* arr, int n) {
     int j = n - 1;
     int max_i = 0;
 
+    int compare = 0, transp = 0;
+
     for (int i = 0; i < n; i++) {
         for (int q = 0; q <= j; q++) {
             compare++;
@@ -120,16 +119,18 @@ void selection_sort(long long int* arr, int n) {
         j--;
         max_i = 0;
     }
+
+    printf("Selection sort, sizo of array is %d\n\t Amount of compares - %d, amount of transpositions - %d\n", n, compare, transp);
 }
 
 // функции для пирамидальной сортировки
-void heapify(long long int* arr, int n, int i) {
+void heapify(long long int* arr, int n, int i, int* compare, int* transp) {
     int largest = i;
     int left = 2 * i + 1;
     int right = 2 * i + 2;
 
     if (left < n) {
-        compare++;
+        (*compare)++;
 
         if (arr[left] > arr[largest]) {
             largest = left;
@@ -137,7 +138,7 @@ void heapify(long long int* arr, int n, int i) {
     }
 
     if (right < n) {
-        compare++;
+        (*compare)++;
 
         if (arr[right] > arr[largest]) {
             largest = right;
@@ -146,23 +147,27 @@ void heapify(long long int* arr, int n, int i) {
 
     if (largest != i) {
         swap(&arr[i], &arr[largest]);
-        transp++;
+        (*transp)++;
 
-        heapify(arr, n, largest);
+        heapify(arr, n, largest, compare, transp);
     }
 }
 
 void heap_sort(long long int* arr, int n) {
+    int compare = 0, transp = 0;
+
     for (int i = n / 2 - 1; i >= 0; i--) {
-        heapify(arr, n, i);
+        heapify(arr, n, i, &compare, &transp);
     }
 
     for (int i = n - 1; i > 0; i--) {
         swap(&arr[0], &arr[i]);
         transp++;
 
-        heapify(arr, i, 0);
+        heapify(arr, i, 0, &compare, &transp);
     }
+
+    printf("Heap sort, size of array is %d\n\t Amount of compares - %d, amount of transpositions - %d\n", n, compare, transp);
 }
 
 int main(void) {
@@ -177,6 +182,17 @@ int main(void) {
 
     for (int j = 0; j < values_len; j++) {
         for (int i = 0; i < 3; i++) {
+            if (names[i] == UNSORTED) {
+                printf("---------------------------------------------------\n");
+                printf("Array is UNSORTED\n");
+            } else if (names[i] == SORTED) {
+                printf("---------------------------------------------------\n");
+                printf("Array is SORTED\n");
+            } else {
+                printf("---------------------------------------------------\n");
+                printf("Array is SORTED ROTATED\n");
+            }
+
             for (int t = 0; t < sort_types_len; t++) {
                 char filename[MAX_BUF_SIZE];
                 int n = values[j];
@@ -192,14 +208,11 @@ int main(void) {
                     selection_sort(arr, n);
                 }
 
-                printf("Array is %s, Size of input array - %d, Sort is %s, Compares: %d, Transpositions: %d\n", names[i], n, sort_types[t], compare, transp);
+                // printf("Array is %s, Size of input array - %d, Sort is %s, Compares: %d, Transpositions: %d\n", names[i], n, sort_types[t], compare, transp);
 
                 generate_output(arr, names[i], sort_types[t], n);
 
                 free(arr);
-
-                compare = 0;
-                transp = 0;
             }
         }
     }
