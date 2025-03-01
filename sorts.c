@@ -32,6 +32,22 @@ long long int* crate_array(int n) {
     return res;
 }
 
+// перестановка значений двух переменных
+void swap(long long int* a, long long int* b) {
+    long long int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// вывод массива
+void print_list(long long int* arr, int n) {
+    for (int i = 0; i < n; i++) {
+        printf("%lld ", arr[i]);
+    }
+
+    printf("\n");
+}
+
 long long int* get_data(char* filename, int n) {
     long long int* arr = crate_array(n);
 
@@ -49,6 +65,19 @@ long long int* get_data(char* filename, int n) {
     fclose(file);
 
     return arr;
+}
+
+void test(char* filename, int n) {
+    long long int* arr = get_data(filename, n);
+
+    for (int i = 1; i < n; i++) {
+        if (arr[i] < arr[i - 1]) {
+            printf("\tОшибка в выходном массиве с количеством эл-ов %d и \n\tпутём %s\n", n, filename);
+            return;
+        }
+    }
+
+    printf("\tВыходной массив с количством эл-ов %d и \n\tпутем %s правильно отсортирован\n", n, filename);
 }
 
 // mark - показатель с каким именем сохранять 
@@ -77,22 +106,8 @@ void generate_output(long long int* arr, char* mark, char* sort_type, int n) {
     }
 
     fclose(output_file);
-}
 
-// перестановка значений двух переменных
-void swap(long long int* a, long long int* b) {
-    long long int temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
-// вывод массива
-void print_list(long long int* arr, int n) {
-    for (int i = 0; i < n; i++) {
-        printf("%lld ", arr[i]);
-    }
-
-    printf("\n");
+    test(filename, n);
 }
 
 // сортировки
@@ -107,7 +122,7 @@ void selection_sort(long long int* arr, int n) {
     for (int i = 0; i < n; i++) {
         for (int q = 0; q <= j; q++) {
             compare++;
-            
+
             if (arr[q] > arr[max_i]) {
                 max_i = q;
             }
@@ -120,7 +135,7 @@ void selection_sort(long long int* arr, int n) {
         max_i = 0;
     }
 
-    printf("Selection sort, sizo of array is %d\n\t Amount of compares - %d, amount of transpositions - %d\n", n, compare, transp);
+    printf("Selection sort, размер массива - %d\n\tКоличество сравнений - %d, количество перестаовок - %d\n", n, compare, transp);
 }
 
 // функции для пирамидальной сортировки
@@ -167,7 +182,7 @@ void heap_sort(long long int* arr, int n) {
         heapify(arr, i, 0, &compare, &transp);
     }
 
-    printf("Heap sort, size of array is %d\n\t Amount of compares - %d, amount of transpositions - %d\n", n, compare, transp);
+    printf("Heap sort, размер массива - %d\n\tКоличество сравнений - %d, количество перестановок - %d\n", n, compare, transp);
 }
 
 int main(void) {
@@ -182,16 +197,8 @@ int main(void) {
 
     for (int j = 0; j < values_len; j++) {
         for (int i = 0; i < 3; i++) {
-            if (names[i] == UNSORTED) {
-                printf("---------------------------------------------------\n");
-                printf("Array is UNSORTED\n");
-            } else if (names[i] == SORTED) {
-                printf("---------------------------------------------------\n");
-                printf("Array is SORTED\n");
-            } else {
-                printf("---------------------------------------------------\n");
-                printf("Array is SORTED ROTATED\n");
-            }
+            printf("---------------------------------------------------\n");
+            printf("Array is %s\n", names[i]);
 
             for (int t = 0; t < sort_types_len; t++) {
                 char filename[MAX_BUF_SIZE];
