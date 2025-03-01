@@ -73,6 +73,7 @@ void test(char* filename, int n) {
     for (int i = 1; i < n; i++) {
         if (arr[i] < arr[i - 1]) {
             printf("\tОшибка в выходном массиве с количеством эл-ов %d и \n\tпутём %s\n", n, filename);
+            
             return;
         }
     }
@@ -119,7 +120,7 @@ void selection_sort(long long int* arr, int n) {
 
     int compare = 0, transp = 0;
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n - 1; i++) {
         for (int q = 0; q <= j; q++) {
             compare++;
 

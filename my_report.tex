@@ -1,0 +1,724 @@
+\documentclass[a4paper,12pt,titlepage,finall]{article}
+
+\usepackage[T1,T2A]{fontenc}     % форматы шрифтов
+\usepackage[utf8x]{inputenc}     % кодировка символов, используемая в данном файле
+\usepackage[russian]{babel}      % пакет русификации
+\usepackage{tikz}                % для создания иллюстраций
+\usepackage{pgfplots}            % для вывода графиков функций
+\usepackage{geometry}		 % для настройки размера полей
+\usepackage{indentfirst}         % для отступа в первом абзаце секции
+\usepackage{multirow}            % для таблицы с результатами
+
+% выбираем размер листа А4, все поля ставим по 3см
+\geometry{a4paper,left=30mm,top=30mm,bottom=30mm,right=30mm}
+
+\setcounter{secnumdepth}{0}      % отключаем нумерацию секций
+
+\usepgfplotslibrary{fillbetween} % для изображения областей на графиках
+
+\begin{document}
+% Титульный лист
+\begin{titlepage}
+    \begin{center}
+	{\small \sc Московский государственный университет \\имени М.~В.~Ломоносова\\
+	Факультет вычислительной математики и кибернетики\\}
+	\vfill
+	{\Large \sc Отчет по заданию №1}\\
+~\\
+	{\large \bf <<Методы сортировки>>}\\ 
+~\\
+	{\large \bf Вариант 2 / 1 / 2 / 5}
+    \end{center}
+    \begin{flushright}
+	\vfill {Выполнил:\\
+	студент 104 группы\\
+	Киперь~Д.~Ю.\\
+~\\
+	Преподаватели:\\
+	Цыбров~Е.~Г.\\
+    Кулагин~А.~В.}
+    \end{flushright}
+    \begin{center}
+	\vfill
+	{\small Москва\\2025}
+    \end{center}
+\end{titlepage}
+
+% Автоматически генерируем оглавление на отдельной странице
+\tableofcontents
+\newpage
+
+\section{Постановка задачи}
+{\large Задание требовало от меня сделать следующее:}
+
+\begin{itemize}
+    \item написать генератор массивов длин 10, 100, 1000, 10000, элементами которых будут числа типа \textbf{long~long~int}; 
+    \item сортировать числа в массивах в порядке неубывания;
+    \item написать два алгоритма сортировок: Сортировка простым выбором и Пирамидальная сортировка;
+    \item сделать посчет количества перестановок и сравнений в каждой из сортировок;
+    \item провести эксперементальное сравнение двух алгоритмов сортировки;
+\end{itemize}
+\newpage
+
+
+\section{Структура программы и определение функций}
+
+Моя программа разделена на два модуля:
+\begin{itemize}
+    \item генератор массивов~(с случайными элементами типа \textbf{long long int}) для сортировки
+    \item сортировщик массивов
+\end{itemize}
+
+В пераом модуле, как следует из названия, создаются и записываются в файлы массивы для сортировки.
+В другом модуле реализовано считыване числе из файлов и запись их в массив, с последующей сортировкой
+двумя типами сортировок, пирамидальной и простым выбором. Их результаты записываются в файлы
+в каталог \textbf{output/``name of sort''}
+
+\subsection{Генерация массивов}
+
+Процесс генерации массивов включает в себя создание массива заданной длины с элементами типа \textbf{long long int}. \\
+Так как длина массива может дозодить до 10000 то для удобства он будет сохранятся в отдельный файл.
+
+\begin{verbatim}
+FILE* file_open(char* filename, char* mode) {
+    FILE* file = fopen(filename, mode);
+    if (file == NULL) {
+        if (strcmp("w", mode) == 0) {
+            printf("Ошибка при открытии файла на запись!!\n");
+        }
+
+        if (strcmp("r", mode) == 0) {
+            printf("Ошибка при открытии файла на чтение!!\n");
+        }
+
+        return NULL;
+    }
+
+    return file;
+}
+\end{verbatim}
+
+Данная функция написана в генираторе чтобы при ошибке создания файл было выведено сообщение в консоли
+
+\begin{verbatim}
+void print_list(long long int* arr, int n) {
+    for (int i = 0; i < n; i++) {
+        printf("%lld ", arr[i]);
+    }
+}
+\end{verbatim}
+
+Эта вспомогательная функция выводит в консоль элементы массива (была написана для упрощенной отладки).
+
+\begin{verbatim}
+long long int get_rand_number() {
+    return ((long long int)rand() << 32) | rand();
+}
+\end{verbatim}
+
+Эта функция генерирует случайное число, которое будет использована для заполнения массива.
+
+\begin{verbatim}
+long long int* generate_array(int n) {
+    long long int* arr = (long long int*) malloc(sizeof(long long int) * n);
+
+    for (int i = 0; i < n; i++) {
+        arr[i] = get_rand_number();
+
+        while (arr[i] >= LLONG_MAX - BORDER || arr[i] <= LLONG_MIN + BORDER) {
+            arr[i] = get_rand_number();
+        }
+    }
+
+    return arr;
+}
+
+long long int* generate_sorted_array(int n) {
+    long long int* arr = (long long int*) malloc(sizeof(long long int*) * n);
+
+    arr[0] = get_rand_number();
+    for (int i = 1; i < n; i++) {
+        int ost = get_rand_number() % 10;
+        
+        while (ost == 0) {
+            ost = get_rand_number() % 10;
+        }
+
+        arr[i] = arr[i - 1] + ost;
+    }
+
+    return arr;
+}
+\end{verbatim}
+
+\newpage
+
+\begin{verbatim}
+long long int* generate_rotated_sorted_array(int n) {
+    long long int* arr = (long long int*) malloc(sizeof(long long int*) * n);
+
+    arr[0] = get_rand_number();
+    for (int i = 1; i < n; i++) {
+        int ost = get_rand_number() % 10;
+        
+        while (ost == 0) {
+            ost = get_rand_number() % 10;
+        }
+
+        arr[i] = arr[i - 1] - ost;
+    }
+
+    return arr;
+}
+\end{verbatim}
+
+Эти три функции обеспечивают генерацию трех массивов (в несортирванном, сортированном, сортированном в обратном порядке).
+Память под каждый массив выделяется динамически, и в массив помещаются случайные числа типа \textbf{long~long~int}.
+
+\begin{verbatim}
+void create_file(
+    char* filename,
+    char* filname_sorted,
+    char* filename_rotated_sorted,
+    int n
+) {
+    long long int* arr = generate_array(n);
+    long long int* sorted_arr = generate_sorted_array(n);
+    long long int* rotated_sorted_arr = generate_rotated_sorted_array(n);
+
+    FILE* file = file_open(filename, "w");
+    FILE* file_sorted = file_open(filname_sorted, "w");
+    FILE* file_rotated_sorted = file_open(filename_rotated_sorted, "w");
+
+    for (int i = 0; i < n; i++) {
+        fprintf(file, "%lld\n", arr[i]);
+    }
+
+    for (int i = 0; i < n; i++) {
+        fprintf(file_sorted, "%lld\n", sorted_arr[i]);
+    }
+
+    for (int i = 0; i < n; i++) {
+        fprintf(file_rotated_sorted, "%lld\n", rotated_sorted_arr[i]);
+    }
+
+    fclose(file);
+    fclose(file_sorted);
+    fclose(file_rotated_sorted);
+
+    free(arr);
+    free(sorted_arr);
+    free(rotated_sorted_arr);
+}
+\end{verbatim}
+
+Эта функция принимает имя файлов (несортированного, отсортированного и сортированного в обратном опрядке) и размер каждого из массивов.
+После создаются файлы, и происходит запись данных из массивов в файлы. После чистим память.
+
+\begin{verbatim}
+void generate_data() {
+    int num_params[] = { SMALL_NUM, LITTLE_NUM, MIDDLE_NUM, BIG_NUM };
+    int len = sizeof(num_params) / sizeof(num_params[0]);
+
+    for (int i = 0; i < len; i++) {
+        char filename[MAX_BUF_SIZE];
+        char filename_sorted[MAX_BUF_SIZE];
+        char filename_rotated_sorted[MAX_BUF_SIZE];
+
+        sprintf(
+            filename,
+            "%sunsorted%d.txt",
+            INPUT_CATALOG,
+            num_params[i]
+        );
+        sprintf(
+            filename_sorted,
+            "%ssorted%d.txt",
+            INPUT_CATALOG,
+            num_params[i]
+        );
+        sprintf(
+            filename_rotated_sorted,
+            "%srotated_sorted%d.txt",
+            INPUT_CATALOG,
+            num_params[i]
+        );
+
+        create_file(
+            filename,
+            filename_sorted,
+            filename_rotated_sorted,
+            num_params[i]
+        );
+    }
+}
+\end{verbatim}
+
+Является одной из основных функций в генераторе, ибо явлется корнем создания фалов.
+Она отвечает за создание имен файлов, и вызов функции, которая создает файлы с таким именем и числом параметров.
+
+\begin{verbatim}
+int main(void) {
+    srand(time(NULL));
+
+    generate_data();
+
+    return 0;
+}
+\end{verbatim}
+
+Эта функция является входной точкой всего генератора.
+В ней мы подключаем возможность генерировать случайные числа,
+а затем вызываем функцию, которая генерирует данные и записывает их в файлы.
+
+\newpage
+
+\subsection{Сортировки}
+
+Моей задачей было реализовать сортировку простым выбором и пирамидальную сортировку.
+
+\subsection{Сортировка простым выбором}
+
+Суть сортировки простым выбором заключается в том, что сначала мы проходимся по всему массиву, находим
+в нем максимальный элемент и меняем его с элементом, стоящим в конце массива. Далее сдвигаемся с конца массива на 1 влево
+и проделываем то же самое, только максимальный эл-т ищется до n - 2 индекса(включительно),
+а так же менятеся местами с эл-ом с индексом n - 2. Реализация такого алгоритма приложена ниже.
+
+\begin{verbatim}
+void selection_sort(long long int* arr, int n) {
+    int j = n - 1;
+    int max_i = 0;
+
+    int compare = 0, transp = 0;
+
+    for (int i = 0; i < n; i++) {
+        for (int q = 0; q <= j; q++) {
+            compare++;
+
+            if (arr[q] > arr[max_i]) {
+                max_i = q;  
+            }
+        }
+
+        swap(&arr[max_i], &arr[j]);
+        transp++;
+
+        j--;
+        max_i = 0;
+    }
+
+    printf(
+        "Selection sort, размер массива - %d\n\tКоличество сравнений - %d,
+         количество перестаовок - %d\n",
+        n,
+        compare,
+        transp
+    );
+}
+\end{verbatim}
+
+
+\newpage
+
+\subsection{Пирамидальная сортировка}
+
+Структура данных (банарная) пирамида представлет
+собой объект~-массив который можно рассматривать как почти полное бинарное дерево.
+Каждый узел этого дерева соответствует эл-ту массива. Дерево полностью на всех уровнях 
+за исключением возможно наинизшего, который заполняется слева направо.
+Корнем дерева является A[1] (где 1 - порядковый номер в массиве а не индекс). Для заданного 
+индекса (нумерация с 1) можно легко вычислить:
+\begin{itemize}
+    \item его родителя \textbf{A[i / 2]}
+    \item его левого ребенка \textbf{A[2 * i]}
+    \item его правого ребенка \textbf{A[2 * i + 1]}
+\end{itemize}
+
+На большинстве компьютеров (особенно в наше время) операция $2i$ выполняется с помощью одной
+команды, побитового сдвига влево на 1 бит, аналогично 
+операция $2i + 1$ также выполняется очень быстро, операция полчения родителя выполняется
+сдвигм $i$ на бит вправо.\\
+В варинте моей пирамидальной сортировки выполняется свойтство (свойство неубывающих пирамид) \\
+\begin{center}
+    $A[Parent(i)] <= A[i]$
+\end{center}
+
+Так как в задании было сказано, что отсортировать нужно в неубывающем порядке.
+Таким образом наименьший элемент пирамиды находится в ее корне.
+
+\begin{verbatim}
+void heapify(long long int* arr, int n, int i, int* compare, int* transp) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < n) {
+        (*compare)++;
+
+        if (arr[left] > arr[largest]) {
+            largest = left;
+        }
+    }
+
+    if (right < n) {
+        (*compare)++;
+
+        if (arr[right] > arr[largest]) {
+            largest = right;
+        }
+    }
+
+    if (largest != i) {
+        swap(&arr[i], &arr[largest]);
+        (*transp)++;
+
+        heapify(arr, n, largest, compare, transp);
+    }
+}    
+\end{verbatim}
+
+На каждом шаге определяется больший эл-нт из $arr[i]$ $arr[left]$, $arr[right]$ и его
+индекс записывается в переменную largest. Если индекс largest не равен
+индексу i, то происходит перестановка эл-ов, таким образов для 
+узла i и его дочерних узлов выполняется св-во невозрастания пирамиды, но так как 
+теперь $arr[i]$ теперь оказывется на месте $arr[largest]$ то необходимо
+рекурсивно вызвать функцию heapify для узла $arr[largest]$.
+\\
+Заметим, что размер каждого поддерева не превышает величину $2n/3$, причем наихудший
+случай осуществляется, когда последний уровень заполнен наполовину. Таким образом,
+время выполнения функции описывается рекурентным соотношением$[1]$: 
+\begin{center}
+    $T(n) = T(2n/3) + O(1)$
+\end{center}
+
+А решение данного рекурентного соотношения имеет вид:
+\begin{center}
+    $T(n) = O(\lg n)$
+\end{center}
+
+Далее идет сама пирамидальная сортировка
+
+\begin{verbatim}
+    void heap_sort(long long int* arr, int n) {
+        int compare = 0, transp = 0;
+
+        for (int i = n / 2 - 1; i >= 0; i--) {
+            heapify(arr, n, i, &compare, &transp);
+        }
+
+        for (int i = n - 1; i > 0; i--) {
+            swap(&arr[0], &arr[i]);
+            transp++;
+
+            heapify(arr, i, 0, &compare, &transp);
+        }
+
+        printf(
+            "Heap sort, размер массива - %d\n\tКоличество сравнений - %d,
+                количество перестановок - %d\n",
+            n,
+            compare,
+            transp
+        );
+    }
+\end{verbatim}
+
+Мы знаем, что каждый вызов heapify стоит нам $O(\lg n)$ и таких вызово будет
+$n$ штук, т.е мы можем оценить время работы алгоритма как $O(n\lg n)$. Это верхняя граница, будучи корректной
+не является асимптотически точной.
+\\
+
+Так же в файле sorts.c (файл гже находятся сортировки) находятся следующие вспомогательные функции:
+
+\begin{verbatim}
+// взятие данных из массивов ввода
+long long int* crate_array(int n) {
+    long long int* res = (long long int*) malloc(sizeof(long long int*) * n);
+
+    return res;
+}
+
+// перестановка значений двух переменных
+void swap(long long int* a, long long int* b) {
+    long long int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// вывод массива
+void print_list(long long int* arr, int n) {
+    for (int i = 0; i < n; i++) {
+        printf("%lld ", arr[i]);
+    }
+
+    printf("\n");
+}
+\end{verbatim}
+
+Как можно видеть, они просто создают массив, переставляют значения двух переменных и выводят массив. \\
+
+\begin{verbatim}
+    long long int* get_data(char* filename, int n) {
+        long long int* arr = crate_array(n);
+    
+        FILE* file = fopen(filename, "r");
+        if (file == NULL) {
+            printf("Ошибка при чтении файла входных данных для сортировки\n");
+    
+            return NULL;
+        }
+    
+        for (int i = 0; i < n; i++) {
+            fscanf(file, "%lld", &arr[i]);
+        }
+    
+        fclose(file);
+    
+        return arr;
+    }
+\end{verbatim}
+
+Данная функция нужна для получения данных из входных файлов
+
+\begin{verbatim}
+    void test(char* filename, int n) {
+        long long int* arr = get_data(filename, n);
+    
+        for (int i = 1; i < n; i++) {
+            if (arr[i] < arr[i - 1]) {
+                printf(
+                    "\tОшибка в выходном массиве
+                    с количеством эл-ов %d и \n\tпутём %s\n",
+                    n,
+                    filename
+                );
+
+                return;
+            }
+        }
+    
+        printf(
+            "\tВыходной массив с количством эл-ов %d и
+             \n\tпутем %s правильно отсортирован\n",
+             n,
+             filename
+        );
+    }
+    
+    // mark - показатель с каким именем сохранять 
+    void generate_output(long long int* arr, char* mark, char* sort_type, int n) {
+        char filename[MAX_BUF_SIZE];
+    
+        sprintf(
+            filename,
+            "%s%s%s_were_%s%d.txt",
+            OUTPUT_CATALOG,
+            sort_type,
+            (strcmp(sort_type, "heap_sort/") == 0 ? "hs" : "sls"),
+            mark,
+            n
+        );
+    
+        FILE* output_file = fopen(filename, "w");
+        if (output_file == NULL) {
+            printf("Ошибка при создании файла для вывода данных\n");
+    
+            return;
+        }
+    
+        for (int i = 0; i < n; i++) {
+            fprintf(output_file, "%lld\n", arr[i]);
+        }
+    
+        fclose(output_file);
+    
+        test(filename, n);
+    }
+\end{verbatim}
+
+Последняя функция нужна для записи уже отсортированного массива в файлы в определенных каталогах,
+в зависимости от типа сортировки и именем для сохранения.\\
+Функция \textbf{test} как раз является тестирующей функцией, 
+которая проверяет, чтобы все числа в массиве были отсортированный в невозрастающем порядке
+
+
+\newpage
+
+\section{Результаты экспериментов}
+
+\hspace{5mm} После написания программы и ее запуска на входных тестах я получил следующие результаты:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c}
+    \cline{1-6}
+    \multirow{2}{*}{\textbf{n}} & \multirow{2}{*}{\textbf{Параметр}} & \multicolumn{3}{|c|}{\textbf{Номер сгенерированного массива}} & \textbf{Среднее} \\
+    \cline{3-6}
+    & & \parbox{1.5cm}{\centering 1} & \parbox{1.5cm}{\centering 2} & \parbox{1.5cm}{\centering 3} & \textbf{значение} \\
+    \cline{1-6}
+    \multirow{2}{*}{10} & Сравнения & 41 & 35 & 40 & 39 & \\
+    \cline{2-6}
+                        & Перемещения & 30 & 21 & 26 & 26 & \\
+    \cline{1-6}
+    \multirow{2}{*}{100} & Сравнения & 1081 & 944 & 1027 & 1018 & \\
+    \cline{2-6}
+                         & Перемещения & 640 & 516 & 581 & 579 & \\
+    \cline{1-6}
+    \multirow{2}{*}{1000} & Сравнения & 17583 & 15965 & 16798 & 16782 & \\
+    \cline{2-6}
+                          & Перемещения & 9708 & 8316 & 9066 & 9030 & \\
+    \cline{1-6}
+    \multirow{2}{*}{10000} & Сравнения & 244460 & 226682 & 235286 & 235476 & \\
+    \cline{2-6}
+                           & Перемещения & 131956 & 116696 & 124144 & 123266 & \\
+    \cline{1-6}
+\end{tabular}
+\caption{Результаты работы Пирамидальной сортировки}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c}
+    \cline{1-6}
+    \multirow{2}{*}{\textbf{n}} & \multirow{2}{*}{\textbf{Параметр}} & \multicolumn{3}{|c|}{\textbf{Номер сгенерированного массива}} & \textbf{Среднее} \\
+    \cline{3-6}
+    & & \parbox{1.5cm}{\centering 1} & \parbox{1.5cm}{\centering 2} & \parbox{1.5cm}{\centering 3} & \textbf{значение} \\
+    \cline{1-6}
+    \multirow{2}{*}{10} & Сравнения & 55 & 55 & 55 & 55 & \\
+    \cline{2-6}
+                        & Перемещения & 10 & 10 & 10 & 10 & \\
+    \cline{1-6}
+    \multirow{2}{*}{100} & Сравнения & 5050 & 5050 & 5050 & 5050 & \\
+    \cline{2-6}
+                            & Перемещения & 100 & 100 & 100 & 100 & \\
+    \cline{1-6}
+    \multirow{2}{*}{1000} & Сравнения & 500500 & 500500 & 500500 & 500500 & \\
+    \cline{2-6}
+                            & Перемещения & 1000 & 1000 & 1000 & 1000 & \\
+    \cline{1-6}
+    \multirow{2}{*}{10000} & Сравнения & 50005000 & 50005000 & 50005000 & 50005000 & \\
+    \cline{2-6}
+                            & Перемещения & 10000 & 10000 & 10000 & 10000 & \\
+    \cline{1-6}
+\end{tabular}
+\caption{Результаты работы Сортировки простым выбором}
+\end{table}
+
+\newpage
+
+\section{Структура программы и спецификация функций}
+
+В данном разделе необходимо привести полный список функций,
+описать их функциональность.
+
+\newpage
+
+\section{Отладка программы}
+
+Отладка программы происходила на каждом этапе разрабтки программы:
+\begin{itemize}
+    \item Написание генератора случайных массивов.
+    \item Написание функций для считывания данных из файла.
+    \item Написание сортиров и проверка их корректности
+\end{itemize}
+
+\subsection{Отладка генератора}
+
+Когда писался генератор массивов и возникали ошибки, то ошибка имела две причины
+\begin{itemize}
+    \item Ошибка при создании файла, куда класть созданный массив
+    \item Ошибка при работе с самим массивом
+\end{itemize}
+
+Первая категория ошибок была решена путем создания функции-обертки, которая
+при создании файла проверяла, был он создан или нет, и в случае отрицательного ответа она
+выводила в консоль сообщение об ошибке, после чего становилось понятно, в чем конкретно 
+в программе была ошибка, а не просто констатация завершения программы с каким-то аварийным кодом.
+\\
+\\
+\indentОшибки при работе с массивом решались путем дебагинга программы,
+и внимательной работой с индексами.
+
+\subsection{Отладка сортировок}
+
+Отладка сортировок состояла из 
+\begin{itemize}
+    \item отлаживания функции считывания данных из файла (делалось это через дебагер)
+    \item отлаживания факциий сортировок
+\end{itemize}
+
+На последнем остановимся поподробней. Так как функции сортировок работают с массивами, то
+их отлаживание происходило путем дебагинга программы (когда индекс выходил ха пределы),
+а также созданием функции test (была описана выше), которая проверяет результирующий массив на 
+правильность (проверяет чтобы числа в нем шли с неубывающем порядке)
+
+
+\newpage
+
+\section{Асимптотика алгоритмов}
+
+\subsection{Асимптотика пирамидальной сортировки}
+
+Время работы heapify при ее вызове для работы с узлом, который находится на высоте h,
+равно $O(h)$, так что общая стоимость процедуры Build Max Heap
+\begin{verbatim}
+    void heap_sort(long long int* arr, int n) {
+        int compare = 0, transp = 0;
+    
+        for (int i = n / 2 - 1; i >= 0; i--) {
+            heapify(arr, n, i, &compare, &transp);
+        }
+        .....
+    }
+\end{verbatim}
+
+ограничена сверху значением \[ 
+{\sum_{h=0}^{[\lg n]} \biggl[\frac{n}{2^(h + 1)} \biggr]}O(h) = O\biggl(n\sum_{h=0}^{[\lg n]} \frac{h}{2^h} \biggr)
+\]
+
+Последняя сумма вычисляется путем подстановки {$x = \frac{1}{2}$ в формулу, что дает
+\[
+\sum_{h=0}^{\inf} \frac{h}{2^h} = \frac{ 1/2 }{ (1 - 1/2)^2 } = 2
+\]
+
+Таким образом, время работы процедуры Build Max Heap имеет верхнюю границу 
+\[
+O\biggl(n\sum_{h=0}^{[\lg n]} \frac{h}{2^h} \biggr) = O\biggl(n\sum_{h = 0}^{\inf} \frac{h}{2^h}  \biggr) = O(n)
+\]
+
+Далее становится очевидно, при выполении следующего кода
+\begin{verbatim}
+    for (int i = n - 1; i > 0; i--) {
+        swap(&arr[0], &arr[i]);
+        transp++;
+
+        heapify(arr, i, 0, &compare, &transp);
+    }
+\end{verbatim}
+Мы будем n раз вызывать процедуру heapify, что в общей сложности займет $O(n\lg n)$ времени. [1]
+
+
+
+\newpage
+
+
+
+
+
+
+
+
+
+\section{Анализ допущенных ошибок}
+
+\newpage
+\begin{raggedright}
+\addcontentsline{toc}{section}{Список цитируемой литературы}
+\begin{thebibliography}{99}
+\bibitem{cs} Кормен Т., Лейзерсон Ч., Ривест Р, Штайн К. Алгоритмы: построение и анализ.
+    Второе издание.~--- М.:<<Вильямс>>, 2005.
+\end{thebibliography}
+\end{raggedright}
+
+
+\end{document}
