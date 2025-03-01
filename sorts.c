@@ -124,7 +124,7 @@ void selection_sort(long long int* arr, int n) {
             compare++;
 
             if (arr[q] > arr[max_i]) {
-                max_i = q;
+                max_i = q;  
             }
         }
 

@@ -49,6 +49,7 @@ long long int* generate_array(int n) {
 
     for (int i = 0; i < n; i++) {
         arr[i] = get_rand_number();
+        
         while (arr[i] >= LLONG_MAX - BORDER || arr[i] <= LLONG_MIN + BORDER) {
             arr[i] = get_rand_number();
         }
@@ -63,6 +64,7 @@ long long int* generate_sorted_array(int n) {
     arr[0] = get_rand_number();
     for (int i = 1; i < n; i++) {
         int ost = get_rand_number() % 10;
+        
         while (ost == 0) {
             ost = get_rand_number() % 10;
         }
@@ -79,6 +81,7 @@ long long int* generate_rotated_sorted_array(int n) {
     arr[0] = get_rand_number();
     for (int i = 1; i < n; i++) {
         int ost = get_rand_number() % 10;
+
         while (ost == 0) {
             ost = get_rand_number() % 10;
         }
