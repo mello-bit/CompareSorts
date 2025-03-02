@@ -76,6 +76,27 @@
 
 \subsection{Генерация массивов}
 
+Сначала объявим заголовочные файлы и константы.
+\begin{verbatim}
+    #include <stdlib.h>
+    #include <string.h>
+    #include <stdio.h>
+    #include <limits.h>
+    #include <time.h>
+    
+    #define INPUT_CATALOG "files/inputs/"
+    #define OUTPUT_CATALOG "files/outputs/"
+    
+    #define SMALL_NUM 10
+    #define LITTLE_NUM 100
+    #define MIDDLE_NUM 1000
+    #define BIG_NUM 10000
+    
+    #define MAX_BUF_SIZE 80
+    
+    #define BORDER 100000
+\end{verbatim}
+
 Процесс генерации массивов включает в себя создание массива заданной длины с элементами типа \textbf{long long int}. \\
 Так как длина массива может дозодить до 10000 то для удобства он будет сохранятся в отдельный файл.
 
@@ -276,6 +297,27 @@ int main(void) {
 \subsection{Сортировки и вспомогательные функции}
 
 Моей задачей было реализовать сортировку простым выбором и пирамидальную сортировку.
+Выведем заголовочные фалы и константы, которые я использовал:
+\begin{verbatim}
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    
+    #define INPUT_CATALOG "files/inputs/"
+    #define OUTPUT_CATALOG "files/outputs/"
+    
+    #define SMALL_NUM 10
+    #define LITTLE_NUM 100
+    #define MIDDLE_NUM 1000
+    #define BIG_NUM 10000
+    
+    #define UNSORTED "unsorted"
+    #define SORTED "sorted"
+    #define SORTED_ROTATED "rotated_sorted"
+    
+    #define MAX_BUF_SIZE 1000
+    #define MEAN_BUF_SIZE 200
+\end{verbatim}
 
 \subsection{Сортировка простым выбором}
 
