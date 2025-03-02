@@ -80,178 +80,178 @@
 Так как длина массива может дозодить до 10000 то для удобства он будет сохранятся в отдельный файл.
 
 \begin{verbatim}
-FILE* file_open(char* filename, char* mode) {
-    FILE* file = fopen(filename, mode);
-    if (file == NULL) {
-        if (strcmp("w", mode) == 0) {
-            printf("Ошибка при открытии файла на запись!!\n");
+    FILE* file_open(char* filename, char* mode) {
+        FILE* file = fopen(filename, mode);
+        if (file == NULL) {
+            if (strcmp("w", mode) == 0) {
+                printf("Ошибка при открытии файла на запись!!\n");
+            }
+
+            if (strcmp("r", mode) == 0) {
+                printf("Ошибка при открытии файла на чтение!!\n");
+            }
+
+            return NULL;
         }
 
-        if (strcmp("r", mode) == 0) {
-            printf("Ошибка при открытии файла на чтение!!\n");
-        }
-
-        return NULL;
+        return file;
     }
-
-    return file;
-}
 \end{verbatim}
 
 Данная функция написана в генираторе чтобы при ошибке создания файл было выведено сообщение в консоли
 
 \begin{verbatim}
-void print_list(long long int* arr, int n) {
-    for (int i = 0; i < n; i++) {
-        printf("%lld ", arr[i]);
+    void print_list(long long int* arr, int n) {
+        for (int i = 0; i < n; i++) {
+            printf("%lld ", arr[i]);
+        }
     }
-}
 \end{verbatim}
 
 Эта вспомогательная функция выводит в консоль элементы массива (была написана для упрощенной отладки).
 
 \begin{verbatim}
-long long int get_rand_number() {
-    return ((long long int)rand() << 32) | rand();
-}
+    long long int get_rand_number() {
+        return ((long long int)rand() << 32) | rand();
+    }
 \end{verbatim}
 
 Эта функция генерирует случайное число, которое будет использована для заполнения массива.
 
 \begin{verbatim}
-long long int* generate_array(int n) {
-    long long int* arr = (long long int*) malloc(sizeof(long long int) * n);
+    long long int* generate_array(int n) {
+        long long int* arr = (long long int*) malloc(sizeof(long long int) * n);
 
-    for (int i = 0; i < n; i++) {
-        arr[i] = get_rand_number();
-
-        while (arr[i] >= LLONG_MAX - BORDER || arr[i] <= LLONG_MIN + BORDER) {
+        for (int i = 0; i < n; i++) {
             arr[i] = get_rand_number();
-        }
-    }
 
-    return arr;
-}
-
-long long int* generate_sorted_array(int n) {
-    long long int* arr = (long long int*) malloc(sizeof(long long int*) * n);
-
-    arr[0] = get_rand_number();
-    for (int i = 1; i < n; i++) {
-        int ost = get_rand_number() % 10;
-        
-        while (ost == 0) {
-            ost = get_rand_number() % 10;
+            while (arr[i] >= LLONG_MAX - BORDER || arr[i] <= LLONG_MIN + BORDER) {
+                arr[i] = get_rand_number();
+            }
         }
 
-        arr[i] = arr[i - 1] + ost;
+        return arr;
     }
 
-    return arr;
-}
+    long long int* generate_sorted_array(int n) {
+        long long int* arr = (long long int*) malloc(sizeof(long long int*) * n);
+
+        arr[0] = get_rand_number();
+        for (int i = 1; i < n; i++) {
+            int ost = get_rand_number() % 10;
+            
+            while (ost == 0) {
+                ost = get_rand_number() % 10;
+            }
+
+            arr[i] = arr[i - 1] + ost;
+        }
+
+        return arr;
+    }
 \end{verbatim}
 
 \newpage
 
 \begin{verbatim}
-long long int* generate_rotated_sorted_array(int n) {
-    long long int* arr = (long long int*) malloc(sizeof(long long int*) * n);
+    long long int* generate_rotated_sorted_array(int n) {
+        long long int* arr = (long long int*) malloc(sizeof(long long int*) * n);
 
-    arr[0] = get_rand_number();
-    for (int i = 1; i < n; i++) {
-        int ost = get_rand_number() % 10;
-        
-        while (ost == 0) {
-            ost = get_rand_number() % 10;
+        arr[0] = get_rand_number();
+        for (int i = 1; i < n; i++) {
+            int ost = get_rand_number() % 10;
+            
+            while (ost == 0) {
+                ost = get_rand_number() % 10;
+            }
+
+            arr[i] = arr[i - 1] - ost;
         }
 
-        arr[i] = arr[i - 1] - ost;
+        return arr;
     }
-
-    return arr;
-}
 \end{verbatim}
 
 Эти три функции обеспечивают генерацию трех массивов (в несортирванном, сортированном, сортированном в обратном порядке).
 Память под каждый массив выделяется динамически, и в массив помещаются случайные числа типа \textbf{long~long~int}.
 
 \begin{verbatim}
-void create_file(
-    char* filename,
-    char* filname_sorted,
-    char* filename_rotated_sorted,
-    int n
-) {
-    long long int* arr = generate_array(n);
-    long long int* sorted_arr = generate_sorted_array(n);
-    long long int* rotated_sorted_arr = generate_rotated_sorted_array(n);
+    void create_file(
+        char* filename,
+        char* filname_sorted,
+        char* filename_rotated_sorted,
+        int n
+    ) {
+        long long int* arr = generate_array(n);
+        long long int* sorted_arr = generate_sorted_array(n);
+        long long int* rotated_sorted_arr = generate_rotated_sorted_array(n);
 
-    FILE* file = file_open(filename, "w");
-    FILE* file_sorted = file_open(filname_sorted, "w");
-    FILE* file_rotated_sorted = file_open(filename_rotated_sorted, "w");
+        FILE* file = file_open(filename, "w");
+        FILE* file_sorted = file_open(filname_sorted, "w");
+        FILE* file_rotated_sorted = file_open(filename_rotated_sorted, "w");
 
-    for (int i = 0; i < n; i++) {
-        fprintf(file, "%lld\n", arr[i]);
+        for (int i = 0; i < n; i++) {
+            fprintf(file, "%lld\n", arr[i]);
+        }
+
+        for (int i = 0; i < n; i++) {
+            fprintf(file_sorted, "%lld\n", sorted_arr[i]);
+        }
+
+        for (int i = 0; i < n; i++) {
+            fprintf(file_rotated_sorted, "%lld\n", rotated_sorted_arr[i]);
+        }
+
+        fclose(file);
+        fclose(file_sorted);
+        fclose(file_rotated_sorted);
+
+        free(arr);
+        free(sorted_arr);
+        free(rotated_sorted_arr);
     }
-
-    for (int i = 0; i < n; i++) {
-        fprintf(file_sorted, "%lld\n", sorted_arr[i]);
-    }
-
-    for (int i = 0; i < n; i++) {
-        fprintf(file_rotated_sorted, "%lld\n", rotated_sorted_arr[i]);
-    }
-
-    fclose(file);
-    fclose(file_sorted);
-    fclose(file_rotated_sorted);
-
-    free(arr);
-    free(sorted_arr);
-    free(rotated_sorted_arr);
-}
 \end{verbatim}
 
 Эта функция принимает имя файлов (несортированного, отсортированного и сортированного в обратном опрядке) и размер каждого из массивов.
 После создаются файлы, и происходит запись данных из массивов в файлы. После чистим память.
 
 \begin{verbatim}
-void generate_data() {
-    int num_params[] = { SMALL_NUM, LITTLE_NUM, MIDDLE_NUM, BIG_NUM };
-    int len = sizeof(num_params) / sizeof(num_params[0]);
+    void generate_data() {
+        int num_params[] = { SMALL_NUM, LITTLE_NUM, MIDDLE_NUM, BIG_NUM };
+        int len = sizeof(num_params) / sizeof(num_params[0]);
 
-    for (int i = 0; i < len; i++) {
-        char filename[MAX_BUF_SIZE];
-        char filename_sorted[MAX_BUF_SIZE];
-        char filename_rotated_sorted[MAX_BUF_SIZE];
+        for (int i = 0; i < len; i++) {
+            char filename[MAX_BUF_SIZE];
+            char filename_sorted[MAX_BUF_SIZE];
+            char filename_rotated_sorted[MAX_BUF_SIZE];
 
-        sprintf(
-            filename,
-            "%sunsorted%d.txt",
-            INPUT_CATALOG,
-            num_params[i]
-        );
-        sprintf(
-            filename_sorted,
-            "%ssorted%d.txt",
-            INPUT_CATALOG,
-            num_params[i]
-        );
-        sprintf(
-            filename_rotated_sorted,
-            "%srotated_sorted%d.txt",
-            INPUT_CATALOG,
-            num_params[i]
-        );
+            sprintf(
+                filename,
+                "%sunsorted%d.txt",
+                INPUT_CATALOG,
+                num_params[i]
+            );
+            sprintf(
+                filename_sorted,
+                "%ssorted%d.txt",
+                INPUT_CATALOG,
+                num_params[i]
+            );
+            sprintf(
+                filename_rotated_sorted,
+                "%srotated_sorted%d.txt",
+                INPUT_CATALOG,
+                num_params[i]
+            );
 
-        create_file(
-            filename,
-            filename_sorted,
-            filename_rotated_sorted,
-            num_params[i]
-        );
+            create_file(
+                filename,
+                filename_sorted,
+                filename_rotated_sorted,
+                num_params[i]
+            );
+        }
     }
-}
 \end{verbatim}
 
 Является одной из основных функций в генераторе, ибо явлется корнем создания фалов.
@@ -273,7 +273,7 @@ int main(void) {
 
 \newpage
 
-\subsection{Сортировки}
+\subsection{Сортировки и вспомогательные функции}
 
 Моей задачей было реализовать сортировку простым выбором и пирамидальную сортировку.
 
@@ -285,36 +285,36 @@ int main(void) {
 а так же менятеся местами с эл-ом с индексом n - 2. Реализация такого алгоритма приложена ниже.
 
 \begin{verbatim}
-void selection_sort(long long int* arr, int n) {
-    int j = n - 1;
-    int max_i = 0;
+    void selection_sort(long long int* arr, int n) {
+        int j = n - 1;
+        int max_i = 0;
 
-    int compare = 0, transp = 0;
+        int compare = 0, transp = 0;
 
-    for (int i = 0; i < n; i++) {
-        for (int q = 0; q <= j; q++) {
-            compare++;
+        for (int i = 0; i < n; i++) {
+            for (int q = 0; q <= j; q++) {
+                compare++;
 
-            if (arr[q] > arr[max_i]) {
-                max_i = q;  
+                if (arr[q] > arr[max_i]) {
+                    max_i = q;  
+                }
             }
+
+            swap(&arr[max_i], &arr[j]);
+            transp++;
+
+            j--;
+            max_i = 0;
         }
 
-        swap(&arr[max_i], &arr[j]);
-        transp++;
-
-        j--;
-        max_i = 0;
+        printf(
+            "Selection sort, размер массива - %d\n\tКоличество сравнений - %d,
+            количество перестаовок - %d\n",
+            n,
+            compare,
+            transp
+        );
     }
-
-    printf(
-        "Selection sort, размер массива - %d\n\tКоличество сравнений - %d,
-         количество перестаовок - %d\n",
-        n,
-        compare,
-        transp
-    );
-}
 \end{verbatim}
 
 
@@ -347,34 +347,34 @@ void selection_sort(long long int* arr, int n) {
 Таким образом наименьший элемент пирамиды находится в ее корне.
 
 \begin{verbatim}
-void heapify(long long int* arr, int n, int i, int* compare, int* transp) {
-    int largest = i;
-    int left = 2 * i + 1;
-    int right = 2 * i + 2;
+    void heapify(long long int* arr, int n, int i, int* compare, int* transp) {
+        int largest = i;
+        int left = 2 * i + 1;
+        int right = 2 * i + 2;
 
-    if (left < n) {
-        (*compare)++;
+        if (left < n) {
+            (*compare)++;
 
-        if (arr[left] > arr[largest]) {
-            largest = left;
+            if (arr[left] > arr[largest]) {
+                largest = left;
+            }
         }
-    }
 
-    if (right < n) {
-        (*compare)++;
+        if (right < n) {
+            (*compare)++;
 
-        if (arr[right] > arr[largest]) {
-            largest = right;
+            if (arr[right] > arr[largest]) {
+                largest = right;
+            }
         }
-    }
 
-    if (largest != i) {
-        swap(&arr[i], &arr[largest]);
-        (*transp)++;
+        if (largest != i) {
+            swap(&arr[i], &arr[largest]);
+            (*transp)++;
 
-        heapify(arr, n, largest, compare, transp);
-    }
-}    
+            heapify(arr, n, largest, compare, transp);
+        }
+    }    
 \end{verbatim}
 
 На каждом шаге определяется больший эл-нт из $arr[i]$ $arr[left]$, $arr[right]$ и его
@@ -431,28 +431,28 @@ $n$ штук, т.е мы можем оценить время работы ал�
 Так же в файле sorts.c (файл гже находятся сортировки) находятся следующие вспомогательные функции:
 
 \begin{verbatim}
-// взятие данных из массивов ввода
-long long int* crate_array(int n) {
-    long long int* res = (long long int*) malloc(sizeof(long long int*) * n);
+    // взятие данных из массивов ввода
+    long long int* crate_array(int n) {
+        long long int* res = (long long int*) malloc(sizeof(long long int*) * n);
 
-    return res;
-}
-
-// перестановка значений двух переменных
-void swap(long long int* a, long long int* b) {
-    long long int temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
-// вывод массива
-void print_list(long long int* arr, int n) {
-    for (int i = 0; i < n; i++) {
-        printf("%lld ", arr[i]);
+        return res;
     }
 
-    printf("\n");
-}
+    // перестановка значений двух переменных
+    void swap(long long int* a, long long int* b) {
+        long long int temp = *a;
+        *a = *b;
+        *b = temp;
+    }
+
+    // вывод массива
+    void print_list(long long int* arr, int n) {
+        for (int i = 0; i < n; i++) {
+            printf("%lld ", arr[i]);
+        }
+
+        printf("\n");
+    }
 \end{verbatim}
 
 Как можно видеть, они просто создают массив, переставляют значения двух переменных и выводят массив. \\
@@ -606,13 +606,6 @@ void print_list(long long int* arr, int n) {
 
 \newpage
 
-\section{Структура программы и спецификация функций}
-
-В данном разделе необходимо привести полный список функций,
-описать их функциональность.
-
-\newpage
-
 \section{Отладка программы}
 
 Отладка программы происходила на каждом этапе разрабтки программы:
@@ -681,12 +674,12 @@ void print_list(long long int* arr, int n) {
 \sum_{h=0}^{\inf} \frac{h}{2^h} = \frac{ 1/2 }{ (1 - 1/2)^2 } = 2
 \]
 
-Таким образом, время работы процедуры Build Max Heap имеет верхнюю границу 
+Таким образом, время работы процедуры Build Max Heap имеет верхнюю границу. 
 \[
 O\biggl(n\sum_{h=0}^{[\lg n]} \frac{h}{2^h} \biggr) = O\biggl(n\sum_{h = 0}^{\inf} \frac{h}{2^h}  \biggr) = O(n)
 \]
 
-Далее становится очевидно, при выполении следующего кода
+Далее становится очевидно, при выполении следующего кода.
 \begin{verbatim}
     for (int i = n - 1; i > 0; i--) {
         swap(&arr[0], &arr[i]);
@@ -695,28 +688,95 @@ O\biggl(n\sum_{h=0}^{[\lg n]} \frac{h}{2^h} \biggr) = O\biggl(n\sum_{h = 0}^{\in
         heapify(arr, i, 0, &compare, &transp);
     }
 \end{verbatim}
-Мы будем n раз вызывать процедуру heapify, что в общей сложности займет $O(n\lg n)$ времени. [1]
-
+Мы будем n раз вызывать процедуру heapify, из-за этого
+общая сложность сортировки будет равна $O(n\lg n)$. [1]
 
 
 \newpage
 
+\subsection{Асимптотика сортировки простым выбором}
+
+Так как сама сортировки имеет небольшой размер, то ее можно повторно
+вставить сюда, для большей наглядности.
+\begin{verbatim}
+    void selection_sort(long long int* arr, int n) {
+        int j = n - 1;
+        int max_i = 0;
+    
+        int compare = 0, transp = 0;
+    
+        for (int i = 0; i < n - 1; i++) {
+            for (int q = 0; q <= j; q++) {
+                compare++;
+    
+                if (arr[q] > arr[max_i]) {
+                    max_i = q;  
+                }
+            }
+    
+            swap(&arr[max_i], &arr[j]);
+            transp++;
+    
+            j--;
+            max_i = 0;
+        }
+    
+        printf(
+            "Selection sort, размер массива - %d\n\t
+            Количество сравнений - %d, количество перестаовок - %d\n",
+            n,
+            compare,
+            transp
+        );
+    }
+\end{verbatim}
+
+По циклам видно, что время работы программы зависит от числа эл-ов~$N$,
+числа сравнений~$A$ и числа перестановочных максимумов~$B$. Нетрудно видеть, 
+что независимо от значений исходных ключей.
+
+\[
+A = {n \choose k} = C_{n}^k = \frac{1}{2}N(N - 1)
+\]
+
+Следовательно, переменной является только величина~B. Несмотря 
+на всю безыскусность простого выбора не так то легко выполнить точный анализ величины~B.
+
+\[
+B = (\min 0,\space ave (N + 1)H_{N} - 2N,\space \max [N^2/4]).
+\]
+
+В этом случае становится особенно интересным максимальное значение. Стандартное отклонение
+величины B имеет порядок $N^{3/4}$.\\
+Такми образом, среднее время работы программы равно
+\[
+2.5N^2 + 3(N + 1)H_{N} + 3.5N - 11
+\]
+машинных циклов, т.е данная программа работает лишь немногим медленнее прагораммы, реализующей
+метод простых вставок. [2]
 
 
-
-
-
-
-
+\newpage
 
 \section{Анализ допущенных ошибок}
+
+В ходе разработки программы возникали ошибки работы с памятью (забывал чистить память),
+которые были устранены. Так же возникали описки в коде, из-за которых в массивах могли генерироваться
+одинаковые числа а не разные. Еще одной ошибкой был неправильный знак сравнения в
+пирамидальной сортировке, из-за которого сортировка работала не правильно.
+\\
+\\
+\indentЕще одной ошибкой, наверное самой большое, являлось столь поздное начало 
+работы над проектом.
 
 \newpage
 \begin{raggedright}
 \addcontentsline{toc}{section}{Список цитируемой литературы}
 \begin{thebibliography}{99}
-\bibitem{cs} Кормен Т., Лейзерсон Ч., Ривест Р, Штайн К. Алгоритмы: построение и анализ.
-    Второе издание.~--- М.:<<Вильямс>>, 2005.
+\bibitem{cs} Кормен Т., Лейзерсон Ч., Ривест Р., Штайн К. Алгоритмы: построение и анализ.
+    Третье издание.~--- М.:<<Вильямс>>, 2013.
+\bibitem{cs} Кнут Д. Искусство программирования для ЭВМ.
+    Том 3.~--- М.: <<Мир>>, 1978.
 \end{thebibliography}
 \end{raggedright}
 
