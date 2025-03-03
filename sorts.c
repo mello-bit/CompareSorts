@@ -27,7 +27,7 @@
 
 // взятие данных из массивов ввода
 long long int* crate_array(int n) {
-    long long int* res = (long long int*) malloc(sizeof(long long int*) * n);
+    long long int* res = (long long int*) malloc(sizeof(long long int) * n);
 
     return res;
 }
@@ -54,7 +54,7 @@ long long int* get_data(char* filename, int n) {
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
         printf("Ошибка при чтении файла входных данных для сортировки\n");
-
+        
         return NULL;
     }
 
@@ -79,6 +79,8 @@ void test(char* filename, int n) {
     }
 
     printf("\tВыходной массив с количством эл-ов %d и \n\tпутем %s правильно отсортирован\n", n, filename);
+
+    free(arr);
 }
 
 // mark - показатель с каким именем сохранять 
