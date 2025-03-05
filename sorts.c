@@ -54,7 +54,7 @@ long long int* get_data(char* filename, int n) {
     FILE* file = fopen(filename, "r");
     if (file == NULL) {
         printf("Ошибка при чтении файла входных данных для сортировки\n");
-        
+
         return NULL;
     }
 
@@ -73,7 +73,7 @@ void test(char* filename, int n) {
     for (int i = 1; i < n; i++) {
         if (arr[i] < arr[i - 1]) {
             printf("\tОшибка в выходном массиве с количеством эл-ов %d и \n\tпутём %s\n", n, filename);
-            
+
             return;
         }
     }
@@ -127,12 +127,14 @@ void selection_sort(long long int* arr, int n) {
             compare++;
 
             if (arr[q] > arr[max_i]) {
-                max_i = q;  
+                max_i = q;
             }
         }
 
-        swap(&arr[max_i], &arr[j]);
-        transp++;
+        if (arr[max_i] != arr[j]) {
+            swap(&arr[max_i], &arr[j]);
+            transp++;
+        }
 
         j--;
         max_i = 0;
